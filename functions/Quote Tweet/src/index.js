@@ -1,18 +1,15 @@
-const sdk = require("node-appwrite");
+const { Client, Databases } = require("node-appwrite");
 const { TwitterApi} = require("twitter-api-v2");
-const  dotenv = require("dotenv");
 const  fetch = require("node-fetch");
-dotenv.config();
 
 module.exports =  async function (req, res) {
-  const client = new sdk.Client();
-  const functions = new sdk.Functions(client);
+  const client = new Client();
 
   if (
     !req.variables['APPWRITE_FUNCTION_ENDPOINT'] ||
     !req.variables['APPWRITE_FUNCTION_API_KEY']
   ) {
-    console.warn("Environment variables are not set. Function cannot use Appwrite SDK.");
+    console.log("Environment variables are not set. Function cannot use Appwrite SDK.");
   } else {
     client
       .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
@@ -21,12 +18,21 @@ module.exports =  async function (req, res) {
       .setSelfSigned(true);
   }
 
-  const Bot = new TwitterApi({
-    appKey: req.variables.appKey,
-    appSecret: req.variables.appSecret,
-    accessToken: req.variables.accessToken,
-    accessSecret: req.variables.accessSecret,
-  });
+  const databases = new Databases(client)
+  let data = await databases.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
+
+  let Bot;
+  try {
+    Bot = new TwitterApi({
+      appKey: data.documents[0].appKey,
+      appSecret: data.documents[0].appSecret,
+      accessToken: data.documents[0].accessToken,
+      accessSecret: data.documents[0].accessSecret,
+    });
+  } catch(err) {
+    console.log(documents)
+    console.log(err)
+  }
 
   async function getNextTweet(){
     let req = await fetch("https://zenquotes.io/api/random");

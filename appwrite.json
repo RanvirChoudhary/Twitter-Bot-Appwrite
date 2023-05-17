@@ -31,6 +31,21 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "6464bfbdcf70065e1559",
+            "name": "Reply Tweet",
+            "runtime": "node-16.0",
+            "path": "functions/Reply Tweet",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
