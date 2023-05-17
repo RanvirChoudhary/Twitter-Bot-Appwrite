@@ -1,0 +1,36 @@
+{
+    "projectId": "646363a8006033c25a57",
+    "projectName": "Twitter-Bot-Motivational-Quotes",
+    "functions": [
+        {
+            "$id": "6463666998215b8bb660",
+            "name": "Quote Tweet",
+            "runtime": "node-16.0",
+            "path": "functions/Quote Tweet",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        },
+        {
+            "$id": "646457412d21180cb709",
+            "name": "Check Mentions",
+            "runtime": "node-16.0",
+            "path": "functions/Check Mentions",
+            "entrypoint": "src/index.js",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        }
+    ]
+}
