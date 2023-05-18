@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-appwrite": "^8.0.0"
+    "node-appwrite": "^8.0.0",
+    "node-fetch": "^2.6.11",
+    "twitter-api-v2": "^1.14.2"
   }
 }

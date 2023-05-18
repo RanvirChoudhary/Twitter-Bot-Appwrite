@@ -7,7 +7,6 @@ module.exports = async function (req, res) {
   if (!req.variables['APPWRITE_FUNCTION_ENDPOINT'] || !req.variables['APPWRITE_FUNCTION_API_KEY']) {
     console.log("Environment variables are not set. Function cannot use Appwrite SDK.");
   } else {
-    console.log(req.variables)
     client
     .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
     .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
@@ -16,7 +15,7 @@ module.exports = async function (req, res) {
   }
   const database = new Databases(client)
   const functions = new Functions(client);
-  let data = await database.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
+  const data = await database.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
 
   try {
     const Bot = new TwitterApi({
@@ -25,10 +24,11 @@ module.exports = async function (req, res) {
       accessToken: data.documents[0].accessToken,
       accessSecret: data.documents[0].accessSecret,
     });
-    const tweets = await Bot.v2.search("@QuotesBot687")
-    functions.createExecution("6464bfbdcf70065e1559", JSON.stringify(tweets))
+    const mentions = await Bot.v2.userMentionTimeline((await Bot.v2.me()).data.id)
+    console.log(mentions)
+    functions.createExecution(req.variables.replyFunctionID, JSON.stringify(mentions));
   } catch(err) {
-    console.log(documents)
+    console.log("An error occured")
     console.log(err)
   }
 

@@ -1,25 +1,56 @@
 const { Client, Databases } = require("node-appwrite");
+const { TwitterApi } = require("twitter-api-v2");
+const  fetch = require("node-fetch");
 
-module.exports = async function (req, res, tweets) {
+module.exports = async function (req, res) {
   const client = new Client();
-
+  const database = new Databases(client);
   
   if (
     !req.variables['APPWRITE_FUNCTION_ENDPOINT'] ||
     !req.variables['APPWRITE_FUNCTION_API_KEY']
-    ) {
-      console.log("Environment variables are not set. Function cannot use Appwrite SDK.");
+  ) {
+      console.warn("Environment variables are not set. Function cannot use Appwrite SDK.");
   } else {
     client
-    .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
-    .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
-    .setKey(req.variables['APPWRITE_FUNCTION_API_KEY'])
-    .setSelfSigned(true);
+      .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
+      .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
+      .setKey(req.variables['APPWRITE_FUNCTION_API_KEY'])
+      .setSelfSigned(true);
   }
-  const database = new Databases(client);
+  const data = await database.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
 
-  console.log(tweets, "Tweets above ✅")
-  
+  const Bot = new TwitterApi({
+    appKey: data.documents[0].appKey,
+    appSecret: data.documents[0].appSecret,
+    accessToken: data.documents[0].accessToken,
+    accessSecret: data.documents[0].accessSecret,
+  });
+
+  async function getReply(){
+    let req = await fetch("https://zenquotes.io/api/random");
+    let tweetObject = await req.json()
+    let nextTweet = `"${tweetObject[0].q}" - ${tweetObject[0].a}`
+    if (nextTweet.length > 280){
+      nextTweet = await getReply();
+    } 
+    return nextTweet
+  }
+
+  const mentions = JSON.parse(req.payload)._realData
+
+  for (const tweet of mentions.data) {
+    if(tweet.text.toLowerCase().includes("give me a quote")){
+      Bot.v2.reply(await getReply(), tweet.id);
+      console.log("it definitely executed...")
+    }
+  }
+
+  // try {
+  // } catch(err) {
+  //   Bot.v2.tweet("An error occured with the bot. Sorry!")
+  // }
+
   res.json({
     areDevelopersAwesome: true,
   });
