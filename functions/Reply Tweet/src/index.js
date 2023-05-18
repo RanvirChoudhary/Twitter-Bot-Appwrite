@@ -36,20 +36,14 @@ module.exports = async function (req, res) {
     } 
     return nextTweet
   }
-
-  const mentions = JSON.parse(req.payload)._realData
-
+  const mentions = JSON.parse(req.payload)._realData;
   for (const tweet of mentions.data) {
-    if(tweet.text.toLowerCase().includes("give me a quote")){
+    const replies = await Bot.v2.get("tweets/search/recent",{query: `in_reply_to_tweet_id:${tweet.id} from:QuotesBot687` });
+    if(tweet.text.toLowerCase().includes("give me a quote") && replies.meta.result_count === 0){      
       Bot.v2.reply(await getReply(), tweet.id);
       console.log("it definitely executed...")
     }
   }
-
-  // try {
-  // } catch(err) {
-  //   Bot.v2.tweet("An error occured with the bot. Sorry!")
-  // }
 
   res.json({
     areDevelopersAwesome: true,
