@@ -37,7 +37,7 @@ module.exports =  async function (req, res) {
   async function getNextTweet(){
     let req = await fetch("https://zenquotes.io/api/random");
     let tweetObject = await req.json()
-    let nextTweet = `"${tweetObject[0].q}" - ${tweetObject[0].a}`
+    let nextTweet = `"${tweetObject[0].q}" - ${tweetObject[0].a}\n#motivation #quotes #inspirationalquotes`
     if (nextTweet.length > 280){
       return getNextTweet();
     } else {
