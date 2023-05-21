@@ -27,25 +27,23 @@ module.exports = async function (req, res) {
     accessSecret: data.documents[0].accessSecret,
   });
 
-  async function getReply(){
-    let req = await fetch("https://zenquotes.io/api/random");
-    let tweetObject = await req.json()
-    let nextTweet = `"${tweetObject[0].q}" - ${tweetObject[0].a}\n#motivation #quotes #inspirationalquotes`
-    if (nextTweet.length > 280){
-      nextTweet = await getReply();
-    } 
-    return nextTweet
+  async function getQuote(){
+    const req = await fetch("https://api.quotable.io/quotes/random?minLength=1&maxLength=280");
+    const quoteObject = await req.json()
+    const nextTweet = `"${quoteObject[0].content}" - ${quoteObject[0].author}\n#motivation #quotes #inspirationalquotes`;
+    return nextTweet;
   }
+
   const mentions = JSON.parse(req.payload)._realData;
   for (const tweet of mentions.data) {
+    // get all replies to the tweet and checks so the bot only replies once
     const replies = await Bot.v2.get("tweets/search/recent",{query: `in_reply_to_tweet_id:${tweet.id} from:QuotesBot687` });
     if(tweet.text.toLowerCase().includes("give me a quote") && replies.meta.result_count === 0){      
-      Bot.v2.reply(await getReply(), tweet.id);
-      console.log("it definitely executed...")
+      Bot.v2.reply(await getQuote(), tweet.id);
     }
   }
 
   res.json({
-    areDevelopersAwesome: true,
-  });
+    "status": "success!"
+  }, 200)
 };

@@ -17,22 +17,18 @@ module.exports = async function (req, res) {
   const functions = new Functions(client);
   const data = await database.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
 
-  try {
-    const Bot = new TwitterApi({
-      appKey: data.documents[0].appKey,
-      appSecret: data.documents[0].appSecret,
-      accessToken: data.documents[0].accessToken,
-      accessSecret: data.documents[0].accessSecret,
-    });
-    const mentions = await Bot.v2.userMentionTimeline((await Bot.v2.me()).data.id)
-    console.log(mentions)
-    functions.createExecution(req.variables.replyFunctionID, JSON.stringify(mentions));
-  } catch(err) {
-    console.log("An error occured")
-    console.log(err)
-  }
+  const Bot = new TwitterApi({
+    appKey: data.documents[0].appKey,
+    appSecret: data.documents[0].appSecret,
+    accessToken: data.documents[0].accessToken,
+    accessSecret: data.documents[0].accessSecret,
+  });
+
+  //Gets mentions to bot and then calls reply function 
+  const mentions = await Bot.v2.userMentionTimeline((await Bot.v2.me()).data.id)
+  functions.createExecution(req.variables.replyFunctionID, JSON.stringify(mentions));
 
   res.json({
-    areDevelopersAwesome: true,
-  });
+    "status": "success!"
+  }, 200)
 };

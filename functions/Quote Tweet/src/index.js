@@ -4,6 +4,7 @@ const  fetch = require("node-fetch");
 
 module.exports =  async function (req, res) {
   const client = new Client();
+  const databases = new Databases(client)
 
   if (
     !req.variables['APPWRITE_FUNCTION_ENDPOINT'] ||
@@ -18,40 +19,28 @@ module.exports =  async function (req, res) {
       .setSelfSigned(true);
   }
 
-  const databases = new Databases(client)
-  let data = await databases.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
+  const data = await databases.listDocuments(req.variables.DatabaseID, req.variables.CollectionID)
 
-  let Bot;
-  try {
-    Bot = new TwitterApi({
+  const Bot = new TwitterApi({
       appKey: data.documents[0].appKey,
       appSecret: data.documents[0].appSecret,
       accessToken: data.documents[0].accessToken,
       accessSecret: data.documents[0].accessSecret,
-    });
-  } catch(err) {
-    console.log(documents)
-    console.log(err)
+  })
+
+  async function getQuote(){
+    const req = await fetch("https://api.quotable.io/quotes/random?minLength=1&maxLength=280");
+    const quoteObject = await req.json()
+    const nextTweet = `"${quoteObject[0].content}" - ${quoteObject[0].author}\n#motivation #quotes #inspirationalquotes`;
+    return nextTweet;
   }
 
-  async function getNextTweet(){
-    let req = await fetch("https://zenquotes.io/api/random");
-    let tweetObject = await req.json()
-    let nextTweet = `"${tweetObject[0].q}" - ${tweetObject[0].a}\n#motivation #quotes #inspirationalquotes`
-    if (nextTweet.length > 280){
-      return getNextTweet();
-    } else {
-      return nextTweet
-    }
-  }
-
-  getNextTweet()
-    .then((tweet) => Bot.v2.tweet(tweet))
+  getQuote()
+    .then(tweet => Bot.v2.tweet(tweet))
     .then(_ => console.log("Tweet Sent"))
-    .catch((err) => {
+    .catch(err => {
       Bot.v2.tweet("There was an error with the bot, hence, it is not working right now.")
       console.error(err)
-      process.exit()
     })
 
   res.json({
